@@ -1,5 +1,5 @@
 import { model, Schema, Types } from 'mongoose';
-import { linkExpression } from '../utils/utils';
+import linkExpression from '../utils/utils';
 
 interface ICard {
   name: string;
@@ -15,10 +15,6 @@ const CardSchema = new Schema<ICard>({
     minlength: 2,
     maxlength: 30,
     required: true,
-    validate: {
-      validator: (v: string) => v.length > 2 && v.length < 30,
-      message: 'Длина текста должна быть от 2 до 30 символов',
-    },
   },
 
   link: {
@@ -37,9 +33,9 @@ const CardSchema = new Schema<ICard>({
   },
 
   likes: {
-    type: [Types.ObjectId],
+    type: [{ type: Schema.Types.ObjectId }],
+    ref: 'user',
     default: [],
-    required: true,
   },
 
   createdAt: {

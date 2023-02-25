@@ -1,9 +1,3 @@
-import { Request } from 'express';
-import { ObjectId } from 'mongoose';
+const linkExpression = /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/;
 
-// eslint-disable-next-line no-useless-escape
-export const linkExpression = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
-
-export interface TempRequest extends Request {
-  user?: { _id: ObjectId };
-}
+export default linkExpression;

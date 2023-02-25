@@ -1,22 +1,16 @@
-/* eslint-disable max-len */
 import { Request, Response, NextFunction } from 'express';
-import ValidationRequestError from '../utils/errors/validation-error';
 import NotFoundError from '../utils/errors/not-found-error';
 import User from '../models/user';
-import { TempRequest } from '../utils/utils';
-import InternalError from '../utils/errors/internal-error';
+import ValidationRequestError from '../utils/errors/validation-error';
+import { IAppRequest } from '../types/AppRequest';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { name, about, avatar } = req.body;
   try {
-    if (!name || !about || !avatar) {
-      next(new ValidationRequestError('Переданы некорректные данные при создании пользователя'));
-      return;
-    }
     const user = await User.create({ name, about, avatar });
     res.send({ data: user });
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -24,8 +18,8 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
   try {
     const users = await User.find({});
     res.send({ data: users });
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -38,13 +32,19 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
       return;
     }
     res.send({ data: user });
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.name === 'CastError') {
+        next(new NotFoundError('Пользователь не найден'));
+        return;
+      }
+      next(err);
+    }
   }
 };
 
-export const getUserInfo = async (req: TempRequest, res: Response, next: NextFunction) => {
-  const id = req.user?._id;
+export const getUserInfo = async (req: IAppRequest, res: Response, next: NextFunction) => {
+  const id = req.user!._id;
   try {
     const user = await User.findById(id);
     if (!user) {
@@ -52,19 +52,15 @@ export const getUserInfo = async (req: TempRequest, res: Response, next: NextFun
       return;
     }
     res.send({ data: user });
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    next(err);
   }
 };
 
-export const updateUser = async (req: TempRequest, res: Response, next: NextFunction) => {
+export const updateUser = async (req: IAppRequest, res: Response, next: NextFunction) => {
   const { name, about } = req.body;
-  const id = req.user?._id;
+  const id = req.user!._id;
   try {
-    if (!name || !about) {
-      next(new ValidationRequestError('Переданы некорректные данные при обновлении профиля'));
-      return;
-    }
     const userUpdate = await User.findByIdAndUpdate(
       id,
       { name, about },
@@ -75,29 +71,37 @@ export const updateUser = async (req: TempRequest, res: Response, next: NextFunc
       return;
     }
     res.send(userUpdate);
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    if (err instanceof Error) {
+      switch (err.name) {
+        case 'ValidationError':
+          next(new ValidationRequestError('Переданы некорректные данные'));
+          break;
+        case 'CastError':
+          next(new NotFoundError('Пользователь не найден'));
+          break;
+        default: next(err);
+      }
+    }
   }
 };
 
-export const updateAvatar = async (req: TempRequest, res: Response, next: NextFunction) => {
+export const updateAvatar = async (req: IAppRequest, res: Response, next: NextFunction) => {
   const avatar = req.body;
-  const id = req.user?._id;
+  const id = req.user!._id;
 
   try {
-    if (!avatar) {
-      next(new ValidationRequestError('Переданы некорректные данные при обновлении аватара'));
-      return;
-    }
-
-    const userUpdateAvatar = await User.findByIdAndUpdate(id, { avatar }, { new: true, runValidators: true });
+    const userUpdateAvatar = await User.findByIdAndUpdate(
+      id,
+      { avatar },
+      { new: true, runValidators: true },
+    );
     if (!userUpdateAvatar) {
       next(new NotFoundError('Пользователь не найден'));
       return;
     }
-
     res.send(userUpdateAvatar);
-  } catch {
-    next(new InternalError('На сервере произошла ошибка'));
+  } catch (err) {
+    next(err);
   }
 };
