@@ -1,5 +1,6 @@
 import { model, Schema, Types } from 'mongoose';
 import linkExpression from '../utils/utils';
+import user from './user';
 
 interface ICard {
   name: string;
@@ -28,13 +29,12 @@ const CardSchema = new Schema<ICard>({
 
   owner: {
     type: Schema.Types.ObjectId,
-    ref: 'user',
+    ref: user,
     required: true,
   },
 
   likes: {
-    type: [{ type: Schema.Types.ObjectId }],
-    ref: 'user',
+    type: [{ type: Schema.Types.ObjectId, ref: user }],
     default: [],
   },
 
@@ -44,4 +44,4 @@ const CardSchema = new Schema<ICard>({
   },
 });
 
-export default model<ICard>('Card', CardSchema);
+export default model<ICard>('card', CardSchema);

@@ -10,7 +10,13 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const user = await User.create({ name, about, avatar });
     res.send({ data: user });
   } catch (err) {
-    next(err);
+    if (err instanceof Error) {
+      if (err.name === 'ValidationError') {
+        next(new ValidationRequestError('Переданы некорректные данные'));
+        return;
+      }
+      next(err);
+    }
   }
 };
 
@@ -34,8 +40,8 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     res.send({ data: user });
   } catch (err) {
     if (err instanceof Error) {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Пользователь не найден'));
+      if (err.name === 'ValidationError') {
+        next(new ValidationRequestError('Переданы некорректные данные'));
         return;
       }
       next(err);
@@ -73,15 +79,11 @@ export const updateUser = async (req: IAppRequest, res: Response, next: NextFunc
     res.send(userUpdate);
   } catch (err) {
     if (err instanceof Error) {
-      switch (err.name) {
-        case 'ValidationError':
-          next(new ValidationRequestError('Переданы некорректные данные'));
-          break;
-        case 'CastError':
-          next(new NotFoundError('Пользователь не найден'));
-          break;
-        default: next(err);
+      if (err.name === 'ValidationError') {
+        next(new ValidationRequestError('Переданы некорректные данные'));
+        return;
       }
+      next(err);
     }
   }
 };
@@ -96,12 +98,14 @@ export const updateAvatar = async (req: IAppRequest, res: Response, next: NextFu
       { avatar },
       { new: true, runValidators: true },
     );
-    if (!userUpdateAvatar) {
-      next(new NotFoundError('Пользователь не найден'));
-      return;
-    }
     res.send(userUpdateAvatar);
   } catch (err) {
-    next(err);
+    if (err instanceof Error) {
+      if (err.name === 'ValidationError') {
+        next(new ValidationRequestError('Переданы некорректные данные'));
+        return;
+      }
+      next(err);
+    }
   }
 };

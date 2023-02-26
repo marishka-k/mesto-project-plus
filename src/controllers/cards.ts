@@ -7,10 +7,10 @@ import Card from '../models/card';
 
 export const createCard = async (req: IAppRequest, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
-  const owner = req.user!._id;
+  const ownerId = req.user!._id;
 
   try {
-    const card = await Card.create({ name, link, owner });
+    const card = await Card.create({ name, link, owner: ownerId });
     res.send({ data: card });
   } catch (err) {
     if (err instanceof Error) {
@@ -25,7 +25,8 @@ export const createCard = async (req: IAppRequest, res: Response, next: NextFunc
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cards = await Card.find({});
+    const cards = await Card.find({}).populate('owner').populate('likes');
+
     res.send({ data: cards });
   } catch (err) {
     next(err);
@@ -55,6 +56,7 @@ export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunc
 
 export const likeCard = async (req: IAppRequest, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
+  const ownerId = req.user!._id;
 
   try {
     if (!cardId) {
@@ -63,7 +65,7 @@ export const likeCard = async (req: IAppRequest, res: Response, next: NextFuncti
     }
     const cardLike = await Card.findByIdAndUpdate(
       cardId,
-      { $addToSet: { likes: req.user?._id } },
+      { $addToSet: { likes: ownerId } },
       { new: true },
     );
     if (!cardLike) {
@@ -73,15 +75,11 @@ export const likeCard = async (req: IAppRequest, res: Response, next: NextFuncti
     res.send({ data: cardLike });
   } catch (err) {
     if (err instanceof Error) {
-      switch (err.name) {
-        case 'ValidationError':
-          next(new ValidationRequestError('Переданы некорректные данные'));
-          break;
-        case 'CastError':
-          next(new NotFoundError('Карточка по указанному id не найдена'));
-          break;
-        default: next(err);
+      if (err.name === 'CastError') {
+        next(new NotFoundError('Карточка по указанному id не найдена'));
+        return;
       }
+      next(err);
     }
   }
 };

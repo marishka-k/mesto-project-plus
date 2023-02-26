@@ -8,7 +8,7 @@ export interface IAppRequest extends Request {
 
 export const requestIdHandler = (req: IAppRequest, res: Response, next: NextFunction) => {
   req.user = {
-    _id: '63b24b4b89048d067a728b4c',
+    _id: '63f9ff8edf6ad091da98978d',
   };
   next();
 };
