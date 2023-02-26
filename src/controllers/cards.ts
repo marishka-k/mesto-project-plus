@@ -23,7 +23,7 @@ export const createCard = async (req: IAppRequest, res: Response, next: NextFunc
 
 export const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cards = await Card.find({}).populate('owner').populate('likes');
+    const cards = await Card.find({}).populate(['owner', 'likes']);
 
     res.send({ data: cards });
   } catch (err) {
