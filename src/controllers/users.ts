@@ -10,13 +10,11 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
     const user = await User.create({ name, about, avatar });
     res.send({ data: user });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'ValidationError') {
-        next(new ValidationRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'ValidationError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -39,13 +37,11 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     }
     res.send({ data: user });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'ValidationError') {
-        next(new ValidationRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'CastError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -78,13 +74,11 @@ export const updateUser = async (req: IAppRequest, res: Response, next: NextFunc
     }
     res.send(userUpdate);
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'ValidationError') {
-        next(new ValidationRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'ValidationError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -100,12 +94,10 @@ export const updateAvatar = async (req: IAppRequest, res: Response, next: NextFu
     );
     res.send(userUpdateAvatar);
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'ValidationError') {
-        next(new ValidationRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'ValidationError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    next(err);
   }
 };

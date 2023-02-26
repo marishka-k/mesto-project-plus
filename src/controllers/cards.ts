@@ -13,13 +13,11 @@ export const createCard = async (req: IAppRequest, res: Response, next: NextFunc
     const card = await Card.create({ name, link, owner: ownerId });
     res.send({ data: card });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'ValidationError') {
-        next(new ValidationRequestError('Переданы некорректные данные'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'ValidationError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -44,13 +42,11 @@ export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunc
     }
     res.send({ data: cardRemove });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Карточка по указанному id не найдена'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'CastError') {
+      next(new ValidationRequestError('Карточка по указанному id не найдена'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -74,13 +70,11 @@ export const likeCard = async (req: IAppRequest, res: Response, next: NextFuncti
     }
     res.send({ data: cardLike });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.name === 'CastError') {
-        next(new NotFoundError('Карточка по указанному id не найдена'));
-        return;
-      }
-      next(err);
+    if (err instanceof Error && err.name === 'CastError') {
+      next(new ValidationRequestError('Карточка по указанному id не найдена'));
+      return;
     }
+    next(err);
   }
 };
 
@@ -103,16 +97,14 @@ export const dislikeCard = async (req: IAppRequest, res: Response, next: NextFun
     }
     res.send(cardDislike);
   } catch (err) {
-    if (err instanceof Error) {
-      switch (err.name) {
-        case 'ValidationError':
-          next(new ValidationRequestError('Переданы некорректные данные'));
-          break;
-        case 'CastError':
-          next(new NotFoundError('Карточка по указанному id не найдена'));
-          break;
-        default: next(err);
-      }
+    if (err instanceof Error && err.name === 'ValidationError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
     }
+    if (err instanceof Error && err.name === 'CastError') {
+      next(new ValidationRequestError('Переданы некорректные данные'));
+      return;
+    }
+    next(err);
   }
 };
