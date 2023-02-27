@@ -97,10 +97,6 @@ export const dislikeCard = async (req: IAppRequest, res: Response, next: NextFun
     }
     res.send(cardDislike);
   } catch (err) {
-    if (err instanceof Error && err.name === 'ValidationError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
-      return;
-    }
     if (err instanceof Error && err.name === 'CastError') {
       next(new ValidationRequestError('Переданы некорректные данные'));
       return;

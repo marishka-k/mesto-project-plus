@@ -68,10 +68,6 @@ export const updateUser = async (req: IAppRequest, res: Response, next: NextFunc
       { name, about },
       { new: true, runValidators: true },
     );
-    if (!userUpdate) {
-      next(new NotFoundError('Пользователь не найден'));
-      return;
-    }
     res.send(userUpdate);
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
