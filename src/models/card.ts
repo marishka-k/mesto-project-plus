@@ -1,5 +1,5 @@
 import { model, Schema, Types } from 'mongoose';
-import linkExpression from '../utils/utils';
+import { linkExpression } from '../utils/utils';
 import user from './user';
 
 interface ICard {

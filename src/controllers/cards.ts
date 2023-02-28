@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import ValidationRequestError from '../utils/errors/validation-error';
+import BadRequestError from '../utils/errors/bad-request-error';
 import NotFoundError from '../utils/errors/not-found-error';
-import { IAppRequest } from '../types/AppRequest';
-
+import { IAppRequest } from '../utils/utils';
 import Card from '../models/card';
 
 export const createCard = async (req: IAppRequest, res: Response, next: NextFunction) => {
@@ -14,7 +13,7 @@ export const createCard = async (req: IAppRequest, res: Response, next: NextFunc
     res.send({ data: card });
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);
@@ -43,7 +42,7 @@ export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunc
     res.send({ data: cardRemove });
   } catch (err) {
     if (err instanceof Error && err.name === 'CastError') {
-      next(new ValidationRequestError('Карточка по указанному id не найдена'));
+      next(new BadRequestError('Карточка по указанному id не найдена'));
       return;
     }
     next(err);
@@ -71,7 +70,7 @@ export const likeCard = async (req: IAppRequest, res: Response, next: NextFuncti
     res.send({ data: cardLike });
   } catch (err) {
     if (err instanceof Error && err.name === 'CastError') {
-      next(new ValidationRequestError('Карточка по указанному id не найдена'));
+      next(new BadRequestError('Карточка по указанному id не найдена'));
       return;
     }
     next(err);
@@ -98,7 +97,7 @@ export const dislikeCard = async (req: IAppRequest, res: Response, next: NextFun
     res.send(cardDislike);
   } catch (err) {
     if (err instanceof Error && err.name === 'CastError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);

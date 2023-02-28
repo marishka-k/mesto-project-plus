@@ -1,17 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
-import NotFoundError from '../utils/errors/not-found-error';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import User from '../models/user';
-import ValidationRequestError from '../utils/errors/validation-error';
-import { IAppRequest } from '../types/AppRequest';
+import NotFoundError from '../utils/errors/not-found-error';
+import BadRequestError from '../utils/errors/bad-request-error';
+import { IAppRequest } from '../utils/utils';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  const hash = await bcrypt.hash(password, 10);
   try {
-    const user = await User.create({ name, about, avatar });
+    const user = await User.create({
+      name, about, avatar, email, password: hash,
+    });
     res.send({ data: user });
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);
@@ -38,7 +45,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     res.send({ data: user });
   } catch (err) {
     if (err instanceof Error && err.name === 'CastError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);
@@ -71,7 +78,7 @@ export const updateUser = async (req: IAppRequest, res: Response, next: NextFunc
     res.send(userUpdate);
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);
@@ -79,7 +86,7 @@ export const updateUser = async (req: IAppRequest, res: Response, next: NextFunc
 };
 
 export const updateAvatar = async (req: IAppRequest, res: Response, next: NextFunction) => {
-  const avatar = req.body;
+  const { avatar } = req.body;
   const id = req.user!._id;
 
   try {
@@ -91,9 +98,21 @@ export const updateAvatar = async (req: IAppRequest, res: Response, next: NextFu
     res.send(userUpdateAvatar);
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
-      next(new ValidationRequestError('Переданы некорректные данные'));
+      next(new BadRequestError('Переданы некорректные данные'));
       return;
     }
     next(err);
   }
+};
+
+export const login = async (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findUserByCredentials(email, password);
+    const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+    return res.cookie('token', token, { httpOnly: true }).end();
+  } catch (err) {
+    next(err);
+  }
+  return null;
 };
