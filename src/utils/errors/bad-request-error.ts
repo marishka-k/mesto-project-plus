@@ -1,4 +1,4 @@
-class ValidationRequestError extends Error {
+class BadRequestError extends Error {
   statusCode: number;
 
   constructor(message: string | undefined) {
@@ -7,4 +7,4 @@ class ValidationRequestError extends Error {
   }
 }
 
-export default ValidationRequestError;
+export default BadRequestError;
