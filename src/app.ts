@@ -22,6 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
 app.use(requestLogger);
 app.post('/signup', celebrate({ body: signupJoiObj }), createUser);
 app.post('/signin', celebrate({ body: signinJoiObj }), login);

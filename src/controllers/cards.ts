@@ -36,7 +36,7 @@ export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunc
   const id = req.user?._id;
 
   try {
-    const cardRemove = await Card.findByIdAndRemove(cardId);
+    const cardRemove = await Card.findById(cardId);
     if (!cardRemove) {
       next(new NotFoundError('Карточка по указанному id не найдена'));
       return;
@@ -44,6 +44,7 @@ export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunc
     if (id !== cardRemove.owner) {
       throw new ForbiddenError('Нет доступа к указанным файлам');
     }
+    await Card.deleteOne({ _id: cardId });
     res.send({ data: cardRemove });
   } catch (err) {
     if (err instanceof Error && err.name === 'CastError') {
