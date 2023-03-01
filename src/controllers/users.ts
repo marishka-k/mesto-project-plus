@@ -6,8 +6,7 @@ import NotFoundError from '../utils/errors/not-found-error';
 import BadRequestError from '../utils/errors/bad-request-error';
 import RegisterError from '../utils/errors/register-error';
 import { IAppRequest } from '../utils/utils';
-
-const { JWT_SECRET = 'secret-key' } = process.env;
+import { JWT_SECRET } from '../middlewares/auth';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
