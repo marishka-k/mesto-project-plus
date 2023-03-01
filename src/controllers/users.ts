@@ -7,6 +7,8 @@ import BadRequestError from '../utils/errors/bad-request-error';
 import RegisterError from '../utils/errors/register-error';
 import { IAppRequest } from '../utils/utils';
 
+const { JWT_SECRET = 'secret-key' } = process.env;
+
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const {
     name, about, avatar, email, password,
@@ -114,8 +116,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   const { email, password } = req.body;
   try {
     const user = await User.findUserByCredentials(email, password);
-    const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
-    return res.cookie('token', token, { httpOnly: true }).end();
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    return res.cookie('token', token, { httpOnly: true, maxAge: 604800, sameSite: true }).end();
   } catch (err) {
     next(err);
   }
