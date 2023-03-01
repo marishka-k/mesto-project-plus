@@ -1,7 +1,10 @@
 import {
   model, Schema, Model, Document,
 } from 'mongoose';
+import bcrypt from 'bcrypt';
 import isEmail from 'validator/lib/isEmail';
+import AuthError from '../utils/errors/auth-error';
+
 import { linkExpression } from '../utils/utils';
 
 interface IUser {
@@ -17,7 +20,7 @@ interface UserModel extends Model<IUser> {
   findUserByCredentials: (email: string, password: string) => Promise<Document<any, any, IUser>>
 }
 
-const UserSchema = new Schema<IUser, UserModel>({
+const UserSchema = new Schema<IUser>({
   name: {
     type: String,
     minlength: 2,
@@ -54,4 +57,21 @@ const UserSchema = new Schema<IUser, UserModel>({
     select: false,
   },
 });
+
+UserSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
+  return this.findOne({ email }).select('+password')
+    .then((user: IUser) => {
+      if (!user) {
+        throw new AuthError('Неправильные почта или пароль');
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            return Promise.reject(new Error('Неправильные почта или пароль'));
+          }
+          return user;
+        });
+    });
+});
+
 export default model<IUser, UserModel>('user', UserSchema);
