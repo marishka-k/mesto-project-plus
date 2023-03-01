@@ -8,13 +8,13 @@ import {
   findUserJoiObj, updateAvatarJoiObj, updateUserJoiObj,
 } from '../utils/utils';
 
-const router = Router();
+const userRouter = Router();
 
-router.get('/', getUsers);
-router.get('/:id', celebrate({ params: findUserJoiObj }), getUserById);
-router.get('/me', getUserInfo);
+userRouter.get('/', getUsers);
+userRouter.get('/:id', celebrate({ params: findUserJoiObj }), getUserById);
+userRouter.get('/me', getUserInfo);
 
-router.patch('/me', celebrate({ body: updateUserJoiObj }), updateUser);
-router.patch('/me/avatar', celebrate({ body: updateAvatarJoiObj }), updateAvatar);
+userRouter.patch('/me', celebrate({ body: updateUserJoiObj }), updateUser);
+userRouter.patch('/me/avatar', celebrate({ body: updateAvatarJoiObj }), updateAvatar);
 
-export default router;
+export default userRouter;

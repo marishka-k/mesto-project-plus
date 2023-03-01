@@ -58,20 +58,16 @@ const UserSchema = new Schema<IUser>({
   },
 });
 
-UserSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
-  return this.findOne({ email }).select('+password')
-    .then((user: IUser) => {
-      if (!user) {
-        throw new AuthError('Неправильные почта или пароль');
-      }
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
-          }
-          return user;
-        });
-    });
+UserSchema.static('findUserByCredentials', async function findUserByCredentials(email: string, password: string) {
+  const user: IUser = await this.findOne({ email }).select('+password');
+  const matched = await bcrypt.compare(password, user.password);
+  if (!user) {
+    return new AuthError('Неправильные почта или пароль');
+  }
+  if (!matched) {
+    return new Error('Неправильные почта или пароль');
+  }
+  return user;
 });
 
 export default model<IUser, UserModel>('user', UserSchema);

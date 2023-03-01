@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import BadRequestError from '../utils/errors/bad-request-error';
 import NotFoundError from '../utils/errors/not-found-error';
+import ForbiddenError from '../utils/errors/forbidden-error';
 import { IAppRequest } from '../utils/utils';
 import Card from '../models/card';
 
@@ -32,12 +33,16 @@ export const getCards = async (req: Request, res: Response, next: NextFunction) 
 
 export const deleteCard = async (req: IAppRequest, res: Response, next: NextFunction) => {
   const { cardId } = req.params;
+  const id = req.user?._id;
 
   try {
     const cardRemove = await Card.findByIdAndRemove(cardId);
     if (!cardRemove) {
       next(new NotFoundError('Карточка по указанному id не найдена'));
       return;
+    }
+    if (id !== cardRemove.owner) {
+      throw new ForbiddenError('Нет доступа к указанным файлам');
     }
     res.send({ data: cardRemove });
   } catch (err) {

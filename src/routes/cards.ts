@@ -7,13 +7,13 @@ import {
   createCardJoiObj, findCardJoiObj,
 } from '../utils/utils';
 
-const router = Router();
+const cardsRouter = Router();
 
-router.get('/', getCards);
-router.post('/', celebrate({ body: createCardJoiObj }), createCard);
-router.delete('/:cardId', celebrate({ params: findCardJoiObj }), deleteCard);
+cardsRouter.get('/', getCards);
+cardsRouter.post('/', celebrate({ body: createCardJoiObj }), createCard);
+cardsRouter.delete('/:cardId', celebrate({ params: findCardJoiObj }), deleteCard);
 
-router.put('/:cardId/likes', celebrate({ params: findCardJoiObj }), likeCard);
-router.delete('/:cardId/likes', celebrate({ params: findCardJoiObj }), dislikeCard);
+cardsRouter.put('/:cardId/likes', celebrate({ params: findCardJoiObj }), likeCard);
+cardsRouter.delete('/:cardId/likes', celebrate({ params: findCardJoiObj }), dislikeCard);
 
-export default router;
+export default cardsRouter;

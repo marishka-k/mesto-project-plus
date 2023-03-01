@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import NotFoundError from '../utils/errors/not-found-error';
 import BadRequestError from '../utils/errors/bad-request-error';
+import RegisterError from '../utils/errors/register-error';
 import { IAppRequest } from '../utils/utils';
 
 export const createUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -19,6 +20,10 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   } catch (err) {
     if (err instanceof Error && err.name === 'ValidationError') {
       next(new BadRequestError('Переданы некорректные данные'));
+      return;
+    }
+    if (err instanceof Error && err.name === 'MongoServerError') {
+      next(new RegisterError('Пользователь с указанной почтой уже существует'));
       return;
     }
     next(err);
